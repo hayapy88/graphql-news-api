@@ -2,38 +2,40 @@ const { ApolloServer, gql } = require("apollo-server");
 const fs = require("fs");
 const path = require("path");
 
-let links = [
-  {
-    id: "link-0",
-    description: "Hello GraphQL",
-    url: "https://graphql.org/",
-  },
-];
+const { PrismaClient } = require("@prisma/client");
+
+const prisma = new PrismaClient();
+
+const typeDefs = gql`
+  ${fs.readFileSync(path.join(__dirname, "schema.graphql"), "utf-8")}
+`;
 
 const resolvers = {
   Query: {
-    feed: () => links,
+    feed: async (_, args, context) => {
+      return context.prisma.link.findMany();
+    },
   },
 
   Mutation: {
-    post: (_, args) => {
-      let idCount = links.length;
-
-      const link = {
-        id: `link-${idCount++}`,
-        description: args.description,
-        url: args.url,
-      };
-
-      links.push(link);
-      return link;
+    post: (_, args, context) => {
+      const newLink = context.prisma.link.create({
+        data: {
+          url: args.url,
+          description: args.description,
+        },
+      });
+      return newLink;
     },
   },
 };
 
 const server = new ApolloServer({
-  typeDefs: fs.readFileSync(path.join(__dirname, "schema.graphql"), "utf-8"),
+  typeDefs,
   resolvers,
+  context: {
+    prisma,
+  },
 });
 
 server.listen().then(({ url }) => console.log(`Server ready at: ${url}`));
