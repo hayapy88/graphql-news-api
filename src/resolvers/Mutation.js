@@ -33,3 +33,26 @@ async function signUp(parent, args, context) {
     );
   }
 }
+
+async function login(parent, args, context) {
+  try {
+    const user = await context.prisma.user.findUnique({
+      where: { email: args.email },
+    });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    throw new Error(
+      "An error occurred while logging in. Please try again later."
+    );
+  }
+  const valid = await bcrypt.compare(args.password, user.password);
+  if (!valid) {
+    throw new Error("Password is invalid.");
+  }
+  // Generate JWT token
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+  return {
+    token,
+    user,
+  };
+}
