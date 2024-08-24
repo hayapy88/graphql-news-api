@@ -36,23 +36,35 @@ async function signUp(parent, args, context) {
 
 async function login(parent, args, context) {
   try {
+    // Find the user by Email
     const user = await context.prisma.user.findUnique({
       where: { email: args.email },
     });
+
+    // Check if user exists
+    if (!user) {
+      throw new Error("No user found with this email.");
+    }
+
+    // Compare the provided password with the stored hashed password
+    const valid = await bcrypt.compare(args.password, user.password);
+    if (!valid) {
+      throw new Error("Password is invalid.");
+    }
+
+    // Set a payload
+    const payload = { userId: user.id };
+
+    // Generate JWT token
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+    return {
+      token,
+      user,
+    };
   } catch (error) {
     console.error("Error logging in:", error);
     throw new Error(
       "An error occurred while logging in. Please try again later."
     );
   }
-  const valid = await bcrypt.compare(args.password, user.password);
-  if (!valid) {
-    throw new Error("Password is invalid.");
-  }
-  // Generate JWT token
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
-  return {
-    token,
-    user,
-  };
 }
