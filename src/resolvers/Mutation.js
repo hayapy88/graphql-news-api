@@ -1,10 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// This JWT secret key is used to sign and verify JSON Web Tokens
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = require("../utils");
 
-async function signUp(parent, args, context) {
+async function signUp(_, args, context) {
   try {
     // Set password
     const password = await bcrypt.hash(args.password, 10);
@@ -34,7 +33,7 @@ async function signUp(parent, args, context) {
   }
 }
 
-async function login(parent, args, context) {
+async function login(_, args, context) {
   try {
     // Find the user by Email
     const user = await context.prisma.user.findUnique({
@@ -68,3 +67,20 @@ async function login(parent, args, context) {
     );
   }
 }
+
+async function post(_, args, context) {
+  const { userId } = context;
+  return await context.prisma.link.create({
+    data: {
+      url: args.url,
+      description: args.description,
+      postedBy: { connect: { id: userId } },
+    },
+  });
+}
+
+module.exports = {
+  signUp,
+  login,
+  post,
+};

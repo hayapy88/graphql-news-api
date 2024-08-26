@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const { PrismaClient } = require("@prisma/client");
+const { getUserId } = require("./utils");
 
 const prisma = new PrismaClient();
 
@@ -34,8 +35,12 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: {
-    prisma,
+  context: ({ req }) => {
+    const userId = req && req.headers.authorization ? getUserId(req) : null;
+    return {
+      prisma,
+      userId,
+    };
   },
 });
 
