@@ -9,7 +9,7 @@ type Mutation {
 }
 
 type Subscription {
-  newLink: link
+  newLink: Link
 }
 
 type Link {
