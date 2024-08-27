@@ -11,6 +11,11 @@ const Mutation = require("./resolvers/Mutation");
 const Link = require("./resolvers/Link");
 const User = require("./resolvers/User");
 
+// Subscription
+// Publisher / Subscriber
+const { PubSub } = require("apollo-server");
+const pubsub = new pubsub();
+
 const prisma = new PrismaClient();
 
 const typeDefs = gql`
@@ -31,6 +36,7 @@ const server = new ApolloServer({
     const userId = req && req.headers.authorization ? getUserId(req) : null;
     return {
       prisma,
+      pubsub,
       userId,
     };
   },

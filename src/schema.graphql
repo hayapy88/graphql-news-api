@@ -8,6 +8,10 @@ type Mutation {
   login(email: String!, password: String!): AuthPayload
 }
 
+type Subscription {
+  newLink: link
+}
+
 type Link {
   id: ID!
   description: String!
