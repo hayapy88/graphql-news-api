@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = require("../utils");
+const { JWT_SECRET } = require("../utils");
 
 async function signUp(_, args, context) {
   try {
