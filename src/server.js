@@ -34,11 +34,11 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => {
+    const userId = req && req.headers.authorization ? getUserId(req) : null;
     return {
-      ...req,
       prisma,
       pubsub,
-      userId: req && req.headers.authorization ? getUserId(req) : null,
+      userId,
     };
   },
 });
